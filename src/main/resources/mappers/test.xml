@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.wolf.dao.TestDao" >
+    <!-- 字段与实体的映射 -->
+    <resultMap id="BaseResultMap" type="com.example.wolf.entiry.Test">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="age" property="age" jdbcType="INTEGER" />
+    </resultMap>
+    <select id="findAll" resultMap="BaseResultMap">
+    select * from t_test
+  </select>
+    <select id="findOne" resultMap="BaseResultMap" parameterType="int">
+        select * from t_test where id = #{id}
+    </select>
+    <insert id="batchAdd" useGeneratedKeys="true" parameterType="java.util.List">
+      INSERT INTO  t_test(id,name,age) VALUES
+      <foreach collection="list" item = "item" separator=",">
+          (#{item.id},#{item.name},#{item.age})
+      </foreach>
+        ON DUPLICATE KEY UPDATE id=VALUES(id),name=VALUES(name),age=VALUES(age)
+    </insert>
+</mapper>

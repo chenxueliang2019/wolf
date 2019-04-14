@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.wolf.dao.DictDao" >
+    <sql id="areaFiled">
+        id id,city_code cityCode,area_code areaCode,area_name areaName
+    </sql>
+    <!-- 字段与实体的映射 -->
+    <select id="findAreas" resultType="com.example.wolf.entiry.DictAreas">
+        select <include refid="areaFiled"/> from t_dict_areas
+    </select>
+
+    <insert id="insertCustomer" parameterType="list">
+        insert into t_dict_customer(name,area_code) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.name},#{item.areaCode})
+        </foreach>
+    </insert>
+
+    <select id="countDataNum" resultType="int" parameterType="com.example.wolf.entiry.QueryParam">
+        select count(*)
+        from t_dict_provinces p
+        left join t_dict_cities ct on p.province_code=ct.province_code
+        left join t_dict_areas a on a.city_code=ct.city_code
+        left join t_dict_customer m on a.area_code=m.area_code
+        where 1=1
+        <if test="param.provinceCode != null and param.provinceCode != ''">
+            and p.province_code=#{param.provinceCode}
+        </if>
+        <if test="param.cityCode != null and param.cityCode != ''">
+            and ct.city_code=#{param.cityCode}
+        </if>
+        <if test="param.areaCode != null and param.areaCode != ''">
+            and a.city_code=#{param.areaCode}
+        </if>
+        <if test="param.keyWord != null and param.keyWord != ''">
+            and  (
+            p.province_name like CONCAT('%',#{param.keyWord},'%')
+            or ct.city_name like CONCAT('%',#{param.keyWord},'%')
+            or a.area_name like CONCAT('%',#{param.keyWord},'%')
+            )
+        </if>
+    </select>
+
+    <select id="findDictData" resultType="com.example.wolf.entiry.DictVO">
+        select p.province_name as provinceName,p.province_code as provinceCode,
+        ct.city_name as cityName,ct.city_code as cityCode,
+        a.area_name as areaName,a.area_code as areaCode,
+        m.name as customerName,m.id as customerId
+        from t_dict_provinces p
+        left join t_dict_cities ct on p.province_code=ct.province_code
+        left join t_dict_areas a on a.city_code=ct.city_code
+        left join t_dict_customer m on a.area_code=m.area_code
+        where 1=1
+        <if test="param.provinceCode != null and param.provinceCode != ''">
+            and p.province_code=#{param.provinceCode}
+        </if>
+        <if test="param.cityCode != null and param.cityCode != ''">
+            and ct.city_code=#{param.cityCode}
+        </if>
+        <if test="param.areaCode != null and param.areaCode != ''">
+            and a.city_code=#{param.areaCode}
+        </if>
+        <if test="param.keyWord != null and param.keyWord != ''">
+            and (
+               p.province_name like CONCAT('%',#{param.keyWord},'%')
+            or ct.city_name like CONCAT('%',#{param.keyWord},'%')
+            or a.area_name like CONCAT('%',#{param.keyWord},'%')
+            )
+        </if>
+        <if test="page != null">
+            order by #{page.sort} limit #{page.offset},#{page.size}
+        </if>
+    </select>
+</mapper>
